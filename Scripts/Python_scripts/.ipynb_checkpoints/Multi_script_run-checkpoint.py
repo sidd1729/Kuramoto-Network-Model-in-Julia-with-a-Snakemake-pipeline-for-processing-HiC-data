@@ -1,0 +1,4 @@
+import subprocess
+
+subprocess.call(['python', 'Kuramoto_example.py','system',"C:/Users/HP/Downloads/Siddharth/Data/hg38/GM12878/100kb/raw/chr1.mat.txt","(143000001,158000001)",100000,10,"C:/Users/HP/Downloads/Siddharth/Data/hg38/GM12878/100kb/Chromosome_1","C:/Users/HP/Downloads/Siddharth/Thesis_Figures/Weighted_Network/GM12878/100kb/Chromosome_1"])
+subprocess.call(['python', 'Kuramoto_example.py','system',"C:/Users/HP/Downloads/Siddharth/Data/hg38/GM12878/100kb/raw/chr1.mat.txt","(143000001,158000001)",100000,10,"C:/Users/HP/Downloads/Siddharth/Data/hg38/GM12878/100kb/Chromosome_1","C:/Users/HP/Downloads/Siddharth/Thesis_Figures/Weighted_Network/GM12878/100kb/Chromosome_1"])
