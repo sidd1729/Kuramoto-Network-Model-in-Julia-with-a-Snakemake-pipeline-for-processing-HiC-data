@@ -1,0 +1,15 @@
+rule runner_juicer:
+    input:
+
+
+    shell:
+        """
+        java -jar /home/ksslab/Programs/Juicer/juicer_tools_1.22.01.jar pre $file /home/ksslab/Siddharth/Program_Directory/Data/Actual_Data/Raw_hic_corrected/${filebase}.hic /home/ksslab/Siddharth/Program_Directory/Data/Actual_Data/Chromsizes/DanRer11_orig_HiCup_chrom.size.txt
+
+        """
+
+rule cool_juicer:
+    shell:
+        """
+        hic2cool convert /home/ksslab/Siddharth/Program_Directory/Data/Actual_Data/Raw_hic_corrected/${filebase}.hic /home/ksslab/Siddharth/Program_Directory/Data/Actual_Data/Raw_cool_corrected/${filebase}.mcool
+        """

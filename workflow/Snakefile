@@ -1,0 +1,58 @@
+
+#Wildcard parameters to run the input from cool file onwards
+(SAMPLE,) = glob_wildcards("temporaries/cools/{sample}.mcool")
+CHROMOSOME_NO = [str(i) for i in range(1,26)]
+RESOLUTION = ["50000"]#,"100000"]
+WINDOW_SIZE =["5","7","9","11","15","21","27","33","39","45","51"]  #["3"]
+
+rule cool_feather_all:
+    input:
+        expand("temporaries/raw_feather/{resolution}/{sample}_{resolution}_{chromosome_no}.feather",sample = SAMPLE,resolution = RESOLUTION,chromosome_no = CHROMOSOME_NO)
+
+#Converting mcool files to contact matrix of certain resolution in feather files for every chromosome separately
+include: 'rules/4_cool_feather.smk'
+
+rule icer_all:
+    input:
+        expand("temporaries/ice_feather/{resolution}/{sample}_{resolution}_{chromosome_no}_ICEd.feather",sample = SAMPLE,resolution = RESOLUTION,chromosome_no = CHROMOSOME_NO)
+
+#Obtaining Insulation scores, Expected Matrix and Observed/Expected and Observed-Expected
+include: 'rules/4.1_insul_expec_calculator.smk'
+
+rule insul_expec_calc_all:
+    input:
+        expand("results/insulation/{resolution}/{window_size}/{sample}_{resolution}_{chromosome_no}_{window_size}_insul.feather",sample = SAMPLE,resolution = RESOLUTION,chromosome_no = CHROMOSOME_NO,window_size = WINDOW_SIZE),
+        expand("temporaries/expected_feather/{resolution}/{window_size}/{sample}_{resolution}_{chromosome_no}_{window_size}_exp.feather",sample = SAMPLE,resolution = RESOLUTION,chromosome_no = CHROMOSOME_NO,window_size = WINDOW_SIZE),
+        expand("results/o_min_e/{resolution}/{window_size}/{sample}_{resolution}_{chromosome_no}_{window_size}_o_min_e.feather",sample = SAMPLE,resolution = RESOLUTION,chromosome_no = CHROMOSOME_NO,window_size = WINDOW_SIZE),
+        expand("results/o_by_e/{resolution}/{window_size}/{sample}_{resolution}_{chromosome_no}_{window_size}_o_by_e.feather",sample = SAMPLE,resolution = RESOLUTION,chromosome_no = CHROMOSOME_NO,window_size = WINDOW_SIZE)
+
+#Obtaining PCs as well as saddleplots
+include: 'rules/4.2_PCs_saddle.smk'
+
+rule PCs_saddle_all:
+    input:
+        expand("results/PCs/{resolution}/{sample}_{resolution}_PC1.feather",sample = SAMPLE,resolution = RESOLUTION),
+        expand("results/PCs/{resolution}/{sample}_{resolution}_PC2.feather",sample = SAMPLE,resolution = RESOLUTION),
+        expand("results/PCs/{resolution}/{sample}_{resolution}_PC3.feather",sample = SAMPLE,resolution = RESOLUTION),
+        expand("results/saddleplots/{resolution}/{sample}_{resolution}_saddleplot.png",sample = SAMPLE,resolution = RESOLUTION)
+
+#Performing ICE normalization of the processed HiC data (contact matrix) and writing to a feather file
+include: 'rules/5_icer.smk'
+
+rule kura_calc_all:
+    input:
+        expand("results/{resolution}/{window_size}/{sample}_{resolution}_{chromosome_no}_{window_size}_r_kura.feather",sample = SAMPLE,resolution = RESOLUTION,chromosome_no = CHROMOSOME_NO,window_size = WINDOW_SIZE),
+        expand("results/{resolution}/{window_size}/{sample}_{resolution}_{chromosome_no}_{window_size}_r_uni.feather",sample = SAMPLE,resolution = RESOLUTION,chromosome_no = CHROMOSOME_NO,window_size = WINDOW_SIZE),
+        expand("results/{resolution}/{window_size}/{sample}_{resolution}_{chromosome_no}_{window_size}_k.feather",sample = SAMPLE,resolution = RESOLUTION,chromosome_no = CHROMOSOME_NO,window_size = WINDOW_SIZE)
+#Calculating K vs r for sliding windows of our HiC contact matrix
+include: 'rules/6_kura_calculator.smk'
+
+#Calculating K_50 from K vs r values obtained for the sliding windows
+
+rule k_50_calc_all:
+    input:
+        expand("results/{resolution}/k_50/{window_size}/{sample}_{resolution}_{chromosome_no}_{window_size}_kura_k_50.feather",sample = SAMPLE,resolution = RESOLUTION,chromosome_no = CHROMOSOME_NO,window_size = WINDOW_SIZE),
+        expand("results/{resolution}/k_50/{window_size}/{sample}_{resolution}_{chromosome_no}_{window_size}_uni_k_50.feather",sample = SAMPLE,resolution = RESOLUTION,chromosome_no = CHROMOSOME_NO,window_size = WINDOW_SIZE),
+        expand("results/{resolution}/perpet_1/{window_size}/{sample}_{resolution}_{chromosome_no}_{window_size}_kura_perpet_1.feather",sample = SAMPLE,resolution = RESOLUTION,chromosome_no = CHROMOSOME_NO,window_size = WINDOW_SIZE),
+        expand("results/{resolution}/perpet_1/{window_size}/{sample}_{resolution}_{chromosome_no}_{window_size}_uni_perpet_1.feather",sample = SAMPLE,resolution = RESOLUTION,chromosome_no = CHROMOSOME_NO,window_size = WINDOW_SIZE)
+include: 'rules/7_k_50_calculator.smk'
